@@ -1,0 +1,52 @@
+#Install packages
+install.packages("biwavelet")
+install.packages("readr")
+
+#Load the biwavelet library
+library(biwavelet)
+library(readr)
+
+# load the data
+path <- "C:\\Education\\Education\\Upcoming papers\\Geothermale\\Water journal\\Water"
+setwd("C:\\Education\\Education\\Upcoming papers\\Geothermale\\Water journal\\Water")
+z <- read_csv("HPC.csv")
+t <- 2:122
+y <- z$d2H
+x1 <- z$Temperature
+x2 <- z$NAO
+# Format data as n x 2 matrix
+y <- cbind(t, y)
+x1 <- cbind(t, x1)
+x2 <- cbind(t, x2)
+
+# Compute partial wavelet coherence
+pwtc_result <- pwtc(y, x1, x2)
+
+# Print the result
+##print(pwtc_result)
+
+# Extract wavelet coherence matrix
+coherence <- pwtc_result$rsq
+
+# Compute average wavelet coherence
+avg_coherence <- mean(coherence)
+
+# Compute percentage of significant coherence at 5% significance level
+pct_significant <- 100 * mean(coherence > pwtc_result$signif[2])
+
+# Print results
+cat("Average wavelet coherence:", avg_coherence, "\n")
+cat("Percentage of significant coherence at 5% significance level:", pct_significant, "%\n")
+
+# Plot wavelet coherence and make room to the right for the color bar
+# Note: plot function can be used instead of plot.vectorwavelet
+old.par <- par(no.readonly=TRUE)
+res <- 300
+width <- 6
+height <- 6
+file_path <- "C:\\Education\\Education\\Upcoming papers\\Geothermale\\Water journal\\Water\\my_plot.png"
+png(file_path, width = width * res, height = height * res, res = res)
+par(oma = c(0, 0, 0, 1), mar = c(5, 4, 4, 5) + 0.1, pin = c(3,3))
+plot.biwavelet(pwtc_result, plot.cb = TRUE, main = "Plot partial wavelet coherence")
+par(old.par)
+dev.off()
